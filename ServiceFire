@@ -42,7 +42,7 @@ stop)
 
 	# Bloquear a passagem de pacotes pelo kernel
 	echo 0 > /proc/sys/net/ipv4/ip_forward
-	echo -en "Stopping Firewall ";ProgressBar
+	echo -en "Stopping Firewall ";ProgressBar; echo -e '\033[01;32mOk\033[00;37m'
   
 ;;
 
@@ -50,7 +50,7 @@ stop)
 start)
 	$0 stop
 	sleep 0.5
-	echo -en "Starting Firewall ";ProgressBar
+	echo -en "Starting Firewall ";ProgressBar; echo -e '\033[01;32mOk\033[00;37m'
 	# liberar a passagem de pacotes pelo kernel
 	echo 1 > /proc/sys/net/ipv4/ip_forward
 
