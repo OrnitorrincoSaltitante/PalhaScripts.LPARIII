@@ -23,7 +23,7 @@ ProgressBar() {
   tput cnorm
 }
 
-#Variáveis Posicionais, Iniciar com stop, start ou restart
+#Variáveis Posicionais, Iniciar com stop, start
 case $1 in
 
 stop)
@@ -42,33 +42,23 @@ stop)
 
 	# Bloquear a passagem de pacotes pelo kernel
 	echo 0 > /proc/sys/net/ipv4/ip_forward
-	echo -en "Stopping Firewall ";ProgressBar; echo -e '\033[01;32mOk\033[00;37m'
-  
+	echo -en "Stopping Firewall ";ProgressBar; echo -e '\033[01;32mOk\033[00;37m'  
 ;;
-
 
 start)
 	$0 stop
 	sleep 0.5
 	echo -en "Starting Firewall ";ProgressBar; echo -e '\033[01;32mOk\033[00;37m'
+	
 	# liberar a passagem de pacotes pelo kernel
 	echo 1 > /proc/sys/net/ipv4/ip_forward
-
-	# Politicas que bloqueiam qualquer tipo de Conexão
-	iptables -P OUTPUT DROP
-	iptables -P INPUT DROP
-	iptables -P FORWARD DROP
 
 	# Iniciando as Regras
 	bash /etc/firewall/rules
 ;;
 
-restart)
-	$0 start
-;;
-
 *)
-	echo 'POR FAVOR USE "stop|start|restart"'
+	echo 'POR FAVOR USE "stop|start"'
 ;;
 
 esac
