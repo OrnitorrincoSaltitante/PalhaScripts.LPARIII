@@ -1,11 +1,11 @@
 #!/bin/bash
 # Script de Regras do Iptables
-# Acionado por /etc/init.d/ServiceFirewall start
+# Acionado por /etc/init.d/firewall start
 
 	#Variaveis
 IfInternet=eth0
 IfLocalClient= '192.100.10.0/255.255.255.0'
-IfLocalServer='192.168.100.11/255.255.255.0'
+IfLocalServer='192.168.100.11'
 
 	#Agora Começa as Regras
 	# Liberar acesso ao loopback – 127.0.0.1
@@ -15,17 +15,18 @@ iptables -t filter -A OUTPUT -s 0/0 -d 127.0.0.1 -j ACCEPT
 	#Liberando Acesso a Internet
 iptables -t nat -A POSTROUTING -o $IfInternet -j MASQUERADE
 
-iptables -A INPUT -i $IfLocalClient -j ACCEPT
-iptables -A INPUT -i $IfLocalServer -j ACCEPT
+iptables -A INPUT -s $IfLocalClient -j ACCEPT
+iptables -A INPUT -s $IfLocalServer -j ACCEPT
 
 	#Liberando o SSH, ****Fazer de uma forma mais limpinha
 iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 
 	# Fazendo redirecionamento
-iptables -t nat -A PREROUTING -d 192.100.10.254 -p tcp --dport 80 -j DNAT --to $IfLocalServer
-
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j DNAT --to $IfLocalServer:80
+iptables -t nat -A PREROUTING -d 192.100.10.254 -p tcp --dport 80 -j DNAT --to $IfLocalServer:80
+iptables -t filter -A FORWARD -p tcp -d $IfLocalServer --dport 80 -j ACCEPT
 	#Liberar Ping do Firewall para Internet e Rede LAN
-iptables -t filter -A INPUT -p icmp --icmp-type 0 -s 0/0 -d $IfInternet -j ACCEPT
+iptables -t filter -A INPUT -p icmp --icmp-type 0 -s 0/0 -i eth0 -j ACCEPT
 iptables -t filter -A INPUT -p icmp --icmp-type 8 -s $IfLocalClient -d $IfLocalServer -j ACCEPT
 iptables -t filter -A INPUT -p icmp --icmp-type 8 -s $IfLocalServer -d $IfLocalClient -j ACCEPT
 iptables -t filter -A OUTPUT -p icmp -s 0/0 -d 0/0 -j ACCEPT
